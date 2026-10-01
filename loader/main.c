@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <pthread.h>
 #include <wchar.h>
 #include <wctype.h>
@@ -532,7 +533,6 @@ extern void *__cxa_finalize;
 extern void *__cxa_call_unexpected;
 extern void *__gnu_unwind_frame;
 extern void *__stack_chk_fail;
-int open(const char *pathname, int flags);
 
 static int __stack_chk_guard_fake = 0x42424242;
 
@@ -1589,7 +1589,7 @@ void *CallObjectMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 			return "en";
 		}
 	default:
-		return 0x34343434;
+		return (void *)(uintptr_t)0x34343434;
 	}
 }
 
@@ -1667,8 +1667,10 @@ void check_impl(const char *fname, int line, int a3) {
 }
 
 void patch_game(void) {
-	hook_addr(so_symbol(&sosage_mod, "_ZN6Sosage10check_implEPKciRKNSt6__ndk112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE"), check_impl);
+	hook_addr(so_symbol(&sosage_mod, "_ZN6Sosage10check_implEPKciRKNSt6__ndk112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE"), (uintptr_t)check_impl);
 }
+
+void __real_glTexImage2D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *data);
 
 void __wrap_glTexImage2D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *data) {
 	//printf("glTexImage2D %x %x %d %d\n", level, internalFormat, width, height);
